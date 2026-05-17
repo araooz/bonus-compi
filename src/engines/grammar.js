@@ -128,25 +128,13 @@ export function isTerminal(symbol, grammar) {
 
 /**
  * Split RHS of a production on '|' character for alternatives.
- * Handles edge cases where | might appear in quoted terminals.
+ * The pipe must be surrounded by spaces or at string boundaries to count
+ * as an alternative separator (avoids confusion with | as a terminal).
  */
 function splitAlternatives(rhs) {
-  const parts = [];
-  let current = '';
-  let depth = 0;
-
-  for (let i = 0; i < rhs.length; i++) {
-    const ch = rhs[i];
-    if (ch === "'" || ch === '"') depth = depth === 0 ? 1 : 0;
-    if (ch === '|' && depth === 0) {
-      parts.push(current);
-      current = '';
-    } else {
-      current += ch;
-    }
-  }
-  parts.push(current);
-  return parts;
+  // Split on | that appears as a standalone separator (with surrounding whitespace)
+  // This regex splits on | preceded and followed by whitespace or string boundary
+  return rhs.split(/\s*\|\s*/).filter(s => s.length > 0);
 }
 
 /**
