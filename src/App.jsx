@@ -86,6 +86,11 @@ export default function App() {
         result = simulateRecursiveDescent(grammar, inputStr);
       } else if (parserMethod === 'll1') {
         if (!ll1Data) { setErrors(['Please analyze the grammar first.']); return; }
+        if (ll1Data.hasConflicts) {
+          setErrors(ll1Data.conflicts.map(c => c.message));
+          setActiveTab('tables');
+          return;
+        }
         result = simulateLL1(grammar, ll1Data.table, inputStr);
       } else {
         if (!lrData || !lrData.augGrammar) { setErrors(['Please analyze the grammar first.']); return; }

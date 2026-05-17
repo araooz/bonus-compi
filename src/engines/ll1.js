@@ -77,6 +77,7 @@ export function buildLL1Table(grammar, first, follow) {
   }
 
   // Detect conflicts (multiply-defined entries)
+  // A multiply-defined cell means the grammar is NOT LL(1).
   for (const nt of grammar.nonTerminals) {
     for (const t of columnSymbols) {
       if (table[nt][t].length > 1) {
@@ -84,13 +85,13 @@ export function buildLL1Table(grammar, first, follow) {
           nonTerminal: nt,
           terminal: t,
           productions: table[nt][t].map(e => formatProduction(e.production)),
-          message: `Conflict at M[${nt}, ${t}]: multiple productions ${table[nt][t].map(e => formatProduction(e.production)).join(', ')}`,
+          message: `La gramática no es LL(1) debido a un conflicto en la celda [${nt}][${t}]: producciones ${table[nt][t].map(e => formatProduction(e.production)).join(', ')}`,
         });
       }
     }
   }
 
-  return { table, conflicts, trace, columnSymbols };
+  return { table, conflicts, trace, columnSymbols, hasConflicts: conflicts.length > 0 };
 }
 
 /**
@@ -118,6 +119,11 @@ export function simulateLL1(grammar, table, inputStr) {
   let stepCount = 0;
   const maxSteps = 10000;
 
+  // (B) Detector de bucles: Set que registra estados visitados desde
+  //     el último token consumido. Si vemos el mismo (stackTop, inputPos)
+  //     dos veces sin avanzar, estamos en un ciclo infinito.
+  let pasosVisita = new Set();
+
   // Build parse tree
   let treeIdCounter = 0;
   const treeRoot = { id: treeIdCounter++, symbol: grammar.startSymbol, children: [] };
@@ -141,7 +147,7 @@ export function simulateLL1(grammar, table, inputStr) {
     }
 
     if (top === currentInput) {
-      // Terminal match
+      // Terminal match — token consumed, reset the visited-states set
       steps.push({
         step: stepCount,
         stack: stackStr,
@@ -152,8 +158,28 @@ export function simulateLL1(grammar, table, inputStr) {
       const treeNode = treeStack.pop();
       if (treeNode) treeNode.terminal = true;
       inputPos++;
+      pasosVisita = new Set(); // reset: new token consumed
       continue;
     }
+
+    // (B) Loop detection: check if this exact (top, inputPos) was already
+    //     seen since the last token was consumed.
+    const stateId = `${top}-${inputPos}`;
+    if (pasosVisita.has(stateId)) {
+      steps.push({
+        step: stepCount,
+        stack: stackStr,
+        input: remainingInput,
+        action: 'ERROR: Bucle infinito detectado',
+      });
+      return {
+        accepted: false,
+        steps,
+        error: 'Bucle infinito detectado: El parser ha entrado en un ciclo repetitivo sin consumir entrada.',
+        parseTree: treeRoot,
+      };
+    }
+    pasosVisita.add(stateId);
 
     if (!isNonTerminal(top, grammar)) {
       steps.push({
