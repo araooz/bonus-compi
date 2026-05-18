@@ -113,12 +113,18 @@ export function simulateRecursiveDescent(grammar, inputStr) {
       step: stepCount + 1,
       stack: 'DONE',
       input: '',
-      action: 'ACCEPT — all input consumed',
+      action: 'ACCEPT',
     });
     return { accepted: true, steps, error: null, parseTree: result.node };
   }
 
   if (result && result.newPos < input.length) {
+    steps.push({
+      step: stepCount + 1,
+      stack: 'FAILED',
+      input: input.slice(result.newPos).join(' '),
+      action: `ERROR: Parsed successfully but input remains: '${input.slice(result.newPos).join(' ')}'`,
+    });
     return {
       accepted: false,
       steps,
@@ -126,6 +132,13 @@ export function simulateRecursiveDescent(grammar, inputStr) {
       parseTree: result ? result.node : null,
     };
   }
+
+  steps.push({
+    step: stepCount + 1,
+    stack: 'FAILED',
+    input: input.join(' '),
+    action: 'ERROR: No production sequence matches the input.',
+  });
 
   return {
     accepted: false,
