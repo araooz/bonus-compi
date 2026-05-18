@@ -1,11 +1,7 @@
-/**
- * Preset Grammars — Classic examples for fast demonstration.
- */
-
 export const presetGrammars = [
   {
-    name: 'Simple Expression (LL(1) compatible)',
-    description: 'A classic expression grammar already in LL(1) form with left-recursion eliminated.',
+    name: 'Expresión Simple (Compatible con LL(1))',
+    description: 'ya en forma LL(1) con la recursividad por la izquierda eliminada.',
     grammar: `E → T E'
 E' → + T E' | ε
 T → F T'
@@ -14,30 +10,30 @@ F → ( E ) | i`,
     testInput: 'i + i * i',
   },
   {
-    name: 'Expression (Left-Recursive)',
-    description: 'Standard expression grammar with left recursion — NOT LL(1), but works with LR parsers.',
+    name: 'Expresión (Recursiva por la izquierda)',
+    description: 'con recursividad por la izquierda — NO es LL(1), pero funciona con parsers LR.',
     grammar: `E → E + T | T
 T → T * F | F
 F → ( E ) | i`,
     testInput: 'i + i * i',
   },
   {
-    name: 'Ambiguous If-Else (Dangling Else)',
-    description: 'The classic dangling-else ambiguity. Causes shift/reduce conflicts in LR parsers.',
+    name: 'If-Else Ambiguo (Else colgante)',
+    description: 'Causa conflictos de desplazamiento/reducción en los parsers LR.',
     grammar: `S → i E t S S' | a
 S' → e S | ε
 E → b`,
     testInput: 'i b t a e a',
   },
   {
-    name: 'Balanced Parentheses',
-    description: 'A simple grammar for matched parentheses — useful for basic demonstrations.',
+    name: 'Paréntesis Balanceados',
+    description: 'emparejar parentesis.',
     grammar: `S → ( S ) S | ε`,
     testInput: '( ( ) ) ( )',
   },
   {
-    name: 'Simple Arithmetic (SLR(1))',
-    description: 'A compact arithmetic grammar suitable for SLR(1) parsing.',
+    name: 'Aritmética Simple (SLR(1))',
+    description: 'aritmetica simple para analisis SLR(1).',
     grammar: `E → E + T | T
 T → T * F | F
 F → ( E ) | n`,
