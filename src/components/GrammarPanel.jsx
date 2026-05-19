@@ -60,7 +60,7 @@ export default function GrammarPanel({ grammarText, setGrammarText, inputStr, se
             <option value="lr0">LR(0)</option>
             <option value="slr1">SLR(1)</option>
             <option value="lalr1">LALR(1)</option>
-            <option value="lr1">LR(1) — Canonical</option>
+            <option value="lr1">LR(1)</option>
           </select>
         )}
         <div className="btn-group">
